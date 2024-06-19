@@ -1,6 +1,7 @@
 import os
 import shutil
 import pandas as pd
+from urllib import parse
 
 
 def rename_notion(notion_path):
@@ -40,7 +41,10 @@ def rename_problem(problem_path):
             file_path = os.path.join(problem_path, filename)
             with open(file_path, 'r', encoding='utf-8') as file:
                 content = file.read()
-                content = content.replace(dic[filename], '')
+                ## 将 xxx/png 替换成 image/xxx/png ,xxx中文做了url encode 需要处理一下
+                filename_prefix = parse.quote(filename.replace(".md",""))
+                re = filename_prefix + dic[filename]
+                content = content.replace(re, 'image/'+ filename_prefix)
                 with open(file_path, 'w', encoding='utf-8') as file:
                     file.write(content)
 
@@ -55,6 +59,7 @@ def move_tag(path, csv_path, git_path):
         # question 带了一个. 需要去掉
         key = key.replace('.', '')
 
+
         source_path = os.path.join(path, key)
         target_path = os.path.join(git_path, value)
 
@@ -63,8 +68,9 @@ def move_tag(path, csv_path, git_path):
             os.makedirs(target_path)
 
         ## 不是所有的都有题解
+        ## 目标路径是 git/solution/dp/image/"problems"/png
         if os.path.exists(source_path):
-            shutil.copytree(source_path, os.path.join(target_path, key), dirs_exist_ok=True)
+            shutil.copytree(source_path, os.path.join(target_path, "image/" + key), dirs_exist_ok=True)
 
         source_path = source_path + ".md"
         if os.path.exists(source_path):
@@ -74,13 +80,13 @@ def move_tag(path, csv_path, git_path):
 if __name__ == '__main__':
 
     ## notion 的第一层路径
-    parent_path = "Leetcode review "
+    parent_path = ""
     ## problem 的路径
     problem_path = parent_path + "/Problem(总）"
     ## 题目csv文件的路径
     problem_csv = parent_path + "/Problem(总）.csv"
     ## git文件夹的路径
-    git_folder_path = ""
+    git_folder_path = "/Users/xxx/Documents/GitHub/CodePractise/solution"
 
 
     ## 将最上层文件重命名
