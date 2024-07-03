@@ -6,6 +6,9 @@ from urllib import parse
 
 def rename_notion(notion_path):
     for filename in os.listdir(notion_path):
+        if filename.startswith(".") :
+            continue
+        
         full_path = os.path.join(notion_path, filename)
 
         if filename.endswith(".md"):
@@ -24,6 +27,8 @@ def rename_problem(problem_path):
 
     # 这里将奇怪后缀去掉
     for filename in os.listdir(problem_path):
+        if filename.startswith(".") :
+            continue
         full_path = os.path.join(problem_path, filename)
 
         if filename.endswith(".md"):
@@ -60,40 +65,44 @@ def move_tag(path, csv_path, git_path):
         key = key.replace('.', '')
 
 
-        source_path = os.path.join(path, key)
-        target_path = os.path.join(git_path, value)
+        tags = value.split(",")
+        for tag in tags:
+            tag = tag.strip()
+            source_path = os.path.join(path, key)
 
-        ## 目标文件夹不存在就创建
-        if not os.path.exists(target_path):
-            os.makedirs(target_path)
+            target_path = os.path.join(git_path, tag)
 
-        ## 不是所有的都有题解
-        ## 目标路径是 git/solution/dp/image/"problems"/png
-        if os.path.exists(source_path):
-            shutil.copytree(source_path, os.path.join(target_path, "image/" + key), dirs_exist_ok=True)
+            ## 目标文件夹不存在就创建
+            if not os.path.exists(target_path):
+                os.makedirs(target_path)
 
-        source_path = source_path + ".md"
-        if os.path.exists(source_path):
-            shutil.copy(source_path, target_path)
+            ## 不是所有的都有题解
+            ## 目标路径是 git/solution/dp/image/"problems"/png
+            if os.path.exists(source_path):
+                shutil.copytree(source_path, os.path.join(target_path, "image/" + key), dirs_exist_ok=True)
+
+            source_path = source_path + ".md"
+            if os.path.exists(source_path):
+                shutil.copy(source_path, target_path)
 
 
 if __name__ == '__main__':
 
     ## notion 的第一层路径
-    parent_path = ""
+    parent_path = 'notion/Leetcode review a960419385cc48ccbfd847dd9cb34280'
     ## problem 的路径
     problem_path = parent_path + "/Problem(总）"
     ## 题目csv文件的路径
     problem_csv = parent_path + "/Problem(总）.csv"
     ## git文件夹的路径
-    git_folder_path = "/Users/xxx/Documents/GitHub/CodePractise/solution"
+    git_folder_path = "/Users/xx/Documents/GitHub/CodePractise/solution"
 
 
     ## 将最上层文件重命名
     rename_notion(parent_path)
     ## 重命名题目
     rename_problem(problem_path)
-    # 将题解md文档移动到对应的git文件夹中
+    ## 将题解md文档移动到对应的git文件夹中
     move_tag(problem_path, problem_csv, git_folder_path)
 
-    shutil.copy(os.path.join(parent_path, "踩坑注意点.md"), git_folder_path)
+    shutil.copy(os.path.join(parent_path, "注意点.md"), git_folder_path)
